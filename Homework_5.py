@@ -1,52 +1,38 @@
 '''
-2. Напишите функцию, которая получает на вход директорию и рекурсивно обходит её и все вложенные директории. Результаты обхода сохраните в файлы json, csv и pickle.
-○ Для дочерних объектов указывайте родительскую директорию.
-○ Для каждого объекта укажите файл это или директория.
-○ Для файлов сохраните его размер в байтах, а для директорий размер файлов в ней с учётом всех вложенных файлов и директорий.
-3. Соберите из созданных на уроке и в рамках домашнего задания функций пакет для работы с файлами разных форматов.
+2. Напишите функцию, которая принимает на вход строку - абсолютный путь до файла.
+Функция возвращает кортеж из трёх элементов: путь, имя файла, расширение файла.
 '''
 
 import os
-import json
-import csv
-import pickle
 
-def get_size(path):
-    total = 0
-    for dirpath, dirnames, filenames in os.walk(path):
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            total += os.path.getsize(fp)
-    return total
+def parse_path(path):
+    filepath, file_extension = os.path.splitext(path)
+    dirname, filename = os.path.split(filepath)
+    return (dirname, filename, file_extension)
 
-def directory_walker(dir_path):
-    results = []
-    for root, dirs, files in os.walk(dir_path):
-        for name in files:
-            full_path = os.path.join(root, name)
-            results.append({"parent_directory": root,
-                            "is_file": True,
-                            "name": name,
-                            "size_in_bytes": os.path.getsize(full_path)})
+'''
+3. Напишите однострочный генератор словаря, который принимает на вход три списка одинаковой длины: 
+имена str, ставка int, премия str с указанием процентов вида “10.25%”. В результате получаем словарь 
+с именем в качестве ключа и суммой премии в качестве значения. Сумма рассчитывается как ставка 
+умноженная на процент премии
+'''
 
-        for name in dirs:
-            full_path = os.path.join(root, name)
-            results.append({"parent_directory": root,
-                            "is_file": False,
-                            "name": name,
-                            "size_in_bytes": get_size(full_path)})
+def generate_salary_dict(names_list, salaries_list, bonuses_list):
+    return {name: salary * (1 + float(bonus.strip('%')) / 100) for name, salary, bonus in zip(names_list, salaries_list, bonuses_list)}
 
-    with open("output.json", "w") as json_file:
-        json.dump(results, json_file)
+names = ["Галя", "Петя", "Вася"]
+salaries = [10000, 15000, 20000]
+bonuses = ["10%", "15%", "20%"]
 
-    with open("output.csv", "w") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=results[0].keys())
-        writer.writeheader()
-        writer.writerows(results)
+salary_dict = generate_salary_dict(names, salaries, bonuses)
+print(salary_dict)
 
-    with open("output.pickle", "wb") as pickle_file:
-        pickle.dump(results, pickle_file)
+'''
+4. Создайте функцию генератор чисел Фибоначчи
+'''
 
-
-if __name__ == '__main__':
-    directory_walker(".")
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
